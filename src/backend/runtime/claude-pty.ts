@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import type { IPty } from "node-pty";
 import pty from "node-pty";
 
@@ -77,17 +81,57 @@ class ClaudePtySession implements ManagedClaudeSession {
   }
 }
 
+function resolveClaudeBinary(env: NodeJS.ProcessEnv): string {
+  // node-pty uses posix_spawnp which only searches the child env's PATH.
+  // When the backend is launched by tsx/npm, PATH may not include dirs
+  // added by the user's shell profile (e.g. ~/.local/bin).  Resolve the
+  // absolute path using the user's login shell so the spawn always works.
+  const candidates = [
+    () => {
+      const resolved = execFileSync("/bin/sh", ["-lc", "which claude"], {
+        encoding: "utf8",
+        env,
+        timeout: 3000,
+      }).trim();
+      return resolved || null;
+    },
+    () => {
+      const home = env.HOME ?? os.homedir();
+      const localBin = path.join(home, ".local", "bin", "claude");
+      return fs.existsSync(localBin) ? localBin : null;
+    },
+  ];
+
+  for (const resolve of candidates) {
+    try {
+      const result = resolve();
+      if (result) {
+        console.info(`[ClaudePty] Resolved claude binary: ${result}`);
+        return result;
+      }
+    } catch (error) {
+      console.warn(`[ClaudePty] Resolve attempt failed: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
+  console.warn("[ClaudePty] Could not resolve claude binary, falling back to bare 'claude'");
+  return "claude";
+}
+
 export class ClaudePtyController implements ClaudeSessionController {
   constructor(private readonly adapter: PtyAdapter = new NodePtyAdapter()) {}
 
   async start(config: ClaudeLaunchConfig): Promise<ManagedClaudeSession> {
-    const child = this.adapter.spawn("claude", config.args, {
+    const claudePath = resolveClaudeBinary(config.env);
+    console.info(`[ClaudePty] Spawning ${claudePath} in ${config.cwd} with args: [${config.args.join(", ")}]`);
+    const child = this.adapter.spawn(claudePath, config.args, {
       name: "xterm-color",
       cwd: config.cwd,
       env: config.env,
       cols: 100,
       rows: 30,
     });
+    console.info(`[ClaudePty] Spawned pid=${child.pid}`);
     return new ClaudePtySession(child);
   }
 }

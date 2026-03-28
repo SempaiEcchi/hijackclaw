@@ -110,8 +110,12 @@ export class RuntimeManager {
         },
       };
     } catch (error) {
-      await this.rollbackStart(session);
       const message = error instanceof Error ? error.message : "Runtime start failed";
+      console.error("[RuntimeManager] start() failed:", message);
+      if (error instanceof Error && error.stack) {
+        console.error(error.stack);
+      }
+      await this.rollbackStart(session);
       this.deps.appState.setProxy({
         status: "error",
         model: request.model,
@@ -159,7 +163,25 @@ export class RuntimeManager {
   }
 
   private attachExitHandler(session: ManagedClaudeSession): void {
+    let earlyOutput = "";
+    const detachData = session.onData((chunk) => {
+      if (earlyOutput.length < 2000) {
+        earlyOutput += chunk;
+      }
+    });
+
     session.onExit((payload) => {
+      detachData();
+      const exitMsg = `Claude PTY exited (code=${payload.exitCode ?? "unknown"})`;
+      console.error(exitMsg);
+      if (earlyOutput.length > 0) {
+        console.error("Claude PTY output before exit:\n" + earlyOutput.trimEnd());
+      }
+      this.deps.appState.log("warn", exitMsg);
+      if (earlyOutput.length > 0) {
+        this.deps.appState.log("warn", "Claude output: " + earlyOutput.slice(0, 500).trimEnd());
+      }
+
       this.activeSession = null;
       this.deps.appState.setClaude({
         status: "exited",

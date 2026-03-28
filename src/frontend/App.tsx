@@ -296,7 +296,7 @@ export function App() {
         />
       </section>
 
-      <TerminalPanel enabled={state.claude.status === "running" || state.claude.status === "starting"} onSystemEvent={handleTerminalSystemEvent} />
+      <TerminalPanel enabled={state.claude.status === "running"} onSystemEvent={handleTerminalSystemEvent} />
 
       <details className="events-fold">
         <summary className="events-fold__summary">Event Log ({events.length})</summary>
