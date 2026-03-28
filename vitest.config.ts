@@ -1,0 +1,10 @@
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: "node",
+    environmentMatchGlobs: [["src/frontend/**/*.{test,spec}.{ts,tsx}", "jsdom"]],
+    css: true,
+  },
+});
