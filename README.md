@@ -30,8 +30,7 @@ Your auth tokens are stored locally in `~/.hijackclaw/auth.json` and refresh aut
 ## Quick Start
 
 ```bash
-npm install
-npm run build:cli
+npm i hijackclaw -g
 
 # Authenticate with your ChatGPT account
 hijackclaw login
@@ -65,15 +64,6 @@ Config lives at `~/.hijackclaw/config.json`:
 }
 ```
 
-### Web UI
-
-For the operator console with login, runtime control, and session visibility:
-
-```bash
-npm run build   # full build (frontend + backend)
-npm start       # or: npm run dev for hot reload
-```
-
 ## Architecture
 
 ```
@@ -102,11 +92,13 @@ OpenAI Codex Backend
 ## Development
 
 ```bash
-npm run dev          # Backend + frontend with hot reload
+git clone https://github.com/yungookim/hijackclaw.git
+cd hijackclaw
+npm install
+npm run build
+
 npm test             # Run tests
 npm run check        # TypeScript type checking
-npm run build        # Full production build
-npm run build:cli    # Backend only
 ```
 
 ## Current Limitations
