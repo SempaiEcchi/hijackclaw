@@ -4,7 +4,7 @@ Experimental Project. Use it at your own risk.
 
 Run Claude Code using your ChatGPT/Codex subscription as the backend — no Anthropic API key or Claude session limits required.
 
-<img width="869" height="318" alt="image" src="https://github.com/user-attachments/assets/33e4ff34-8e24-49e5-9ad6-31e6740fbefc" />
+<img width="719" height="263" alt="656857892_17954945292102905_8477525572146901740_n" src="https://github.com/user-attachments/assets/4a3af5d4-de3f-4b35-b7af-16f3e3c3ec85" />
 
 ## Why
 
