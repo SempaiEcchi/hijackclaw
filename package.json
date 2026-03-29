@@ -3,11 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "hijackclaw": "./dist/backend/backend/cli.js"
+  },
   "scripts": {
     "dev": "concurrently -k \"npm:dev:server\" \"npm:dev:ui\"",
     "dev:server": "tsx watch src/backend/main.ts",
     "dev:ui": "vite",
     "build": "vite build && tsc -p tsconfig.server.json",
+    "build:cli": "tsc -p tsconfig.server.json",
     "start": "node dist/backend/backend/main.js",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
     "test": "vitest run",
