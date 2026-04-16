@@ -71,6 +71,36 @@ describe("translateClaudeRequestToUpstream", () => {
     expect(result.reasoning).toEqual({ effort: "high" });
   });
 
+  it("returns no reasoning when thinking is disabled", () => {
+    const result = translateClaudeRequestToUpstream({
+      model: "claude-opus",
+      thinking: { type: "disabled", budget_tokens: 4096 },
+      messages: [{ role: "user", content: "Hello proxy" }],
+    });
+
+    expect(result.reasoning).toBeUndefined();
+  });
+
+  it("returns no reasoning when thinking is disabled even with explicit effort", () => {
+    const result = translateClaudeRequestToUpstream({
+      model: "gpt-5.4",
+      thinking: { type: "disabled" },
+      output_config: { effort: "high" },
+      messages: [{ role: "user", content: "Hello proxy" }],
+    });
+
+    expect(result.reasoning).toBeUndefined();
+  });
+
+  it("derives reasoning effort from model name regardless of casing", () => {
+    const result = translateClaudeRequestToUpstream({
+      model: "Claude-Opus-4",
+      messages: [{ role: "user", content: "Hello proxy" }],
+    });
+
+    expect(result.reasoning).toEqual({ effort: "high" });
+  });
+
   it("throws for non-text non-tool content blocks", () => {
     expect(() =>
       translateClaudeRequestToUpstream({

@@ -24,6 +24,10 @@ function translateReasoning(
   request: ClaudeMessagesRequest,
   options?: TranslateClaudeRequestOptions,
 ): { effort?: "low" | "medium" | "high" } | undefined {
+  if (request.thinking?.type === "disabled") {
+    return undefined;
+  }
+
   const explicitEffort = request.output_config?.effort;
   if (explicitEffort) {
     return { effort: explicitEffort };
@@ -40,7 +44,7 @@ function translateReasoning(
     return { effort: "high" };
   }
 
-  const reasoningModel = options?.reasoningModel ?? request.model;
+  const reasoningModel = (options?.reasoningModel ?? request.model).toLowerCase();
 
   if (reasoningModel.includes("haiku")) {
     return { effort: "low" };
